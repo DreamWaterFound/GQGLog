@@ -13,5 +13,24 @@ list(APPEND glog_LIBRARIES
         @PACKAGE_glog_INSTALL_PREFIX@/lib/libglog.a
         @PACKAGE_glog_INSTALL_PREFIX@/lib/libgqglog.a
 )
+
+# Name
+set(Glog_INCLUDE_DIRS   glog_INCLUDE_DIRS)
+set(GLog_INCLUDE_DIRS   glog_INCLUDE_DIRS)
+set(GLOG_INCLUDE_DIRS   glog_INCLUDE_DIRS)
+
+set(glog_INCLUDE_DIR    glog_INCLUDE_DIRS)
+set(Glog_INCLUDE_DIR    glog_INCLUDE_DIRS)
+set(GLog_INCLUDE_DIR    glog_INCLUDE_DIRS)
+set(GLOG_INCLUDE_DIR    glog_INCLUDE_DIRS)
+
+set(Glog_LIBRARIES      glog_LIBRARIES)
+set(GLog_LIBRARIES      glog_LIBRARIES)
+set(GLOG_LIBRARIES      glog_LIBRARIES)
+
+set(Glog_LIBS           glog_LIBRARIES)
+set(GLog_LIBS           glog_LIBRARIES)
+set(GLOG_LIBS           glog_LIBRARIES)
+
 # ===============================================================
 
