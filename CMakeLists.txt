@@ -349,7 +349,7 @@ set (CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 # HACK by guoqing ==================================================================
 # 设置了编译器选项,屏蔽在高版本编译器中会出现的警告
 set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wno-deprecated-declarations")
-set( CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wno-deprecated -Wno-deprecated-declarations")
+set( CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -Wno-deprecated -Wno-deprecated-declarations")
 # =============================
 
 set (GLOG_PUBLIC_H
@@ -359,11 +359,6 @@ set (GLOG_PUBLIC_H
   ${CMAKE_CURRENT_BINARY_DIR}/glog/stl_logging.h
   ${CMAKE_CURRENT_BINARY_DIR}/glog/vlog_is_on.h
   src/glog/log_severity.h
-
-  # HACK by guoqing ==================================================================
-
-
-  # =============================
 )
 
 set (GLOG_SRCS
@@ -571,7 +566,21 @@ if (BUILD_TESTING)
   endif (TARGET symbolize_unittest)
 endif (BUILD_TESTING)
 
-install (TARGETS glog
+# HACK 国庆添加 增加一些方便外部调用的接口 ============================
+# 头文件
+include_directories(${CMAKE_CURRENT_LIST_DIR}/include)
+# 生成库
+add_library(gqglog
+    ${CMAKE_CURRENT_LIST_DIR}/src/gqglog/gqglog.cc
+)
+# 确保目标已经连接
+target_link_libraries(gqglog
+    glog
+)
+# ===============================================================
+
+# HACK by guoqing 
+install (TARGETS glog gqglog
   EXPORT glog-targets
   RUNTIME DESTINATION bin
   PUBLIC_HEADER DESTINATION include/glog
@@ -582,15 +591,22 @@ if (gflags_FOUND)
   set (gflags_DEPENDENCY "find_dependency (gflags ${gflags_VERSION})")
 endif (gflags_FOUND)
 
+# HACK by guoqing ==============================================
+set(glog_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+# ==============================================================
+
 configure_package_config_file (glog-config.cmake.in
-  ${CMAKE_CURRENT_BINARY_DIR}/glog-config.cmake
-  INSTALL_DESTINATION lib/cmake/glog
-  NO_CHECK_REQUIRED_COMPONENTS_MACRO)
+    ${CMAKE_CURRENT_BINARY_DIR}/glog-config.cmake
+    # HACK BY guoqing 
+    PATH_VARS  glog_INSTALL_PREFIX
+    INSTALL_DESTINATION lib/cmake/glog
+    NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 
 write_basic_package_version_file (glog-config-version.cmake VERSION
   ${GLOG_VERSION} COMPATIBILITY SameMajorVersion)
 
-export (TARGETS glog NAMESPACE glog:: FILE glog-targets.cmake)
+# HACK by guoqing -- 但是这里添加的 gqglog 好像是没有啥必要
+export (TARGETS glog gqglog NAMESPACE glog:: FILE glog-targets.cmake)
 export (PACKAGE glog)
 
 install (FILES
@@ -600,24 +616,33 @@ install (FILES
 
 install (EXPORT glog-targets NAMESPACE glog:: DESTINATION lib/cmake/glog)
 
-
-
 # HACK 国庆添加,用于编译完成后自动将相关的文件复制到指定的目录中 ============================
 add_custom_command(
   TARGET glog
   POST_BUILD
   # 这些头文件来自于这些地方
-  COMMAND cp ${CMAKE_BINARY_DIR}/glog/* ${CMAKE_SOURCE_DIR}/include/glog/
+  COMMAND cp ${CMAKE_BINARY_DIR}/glog/*                  ${CMAKE_SOURCE_DIR}/include/glog/
   COMMAND cp ${CMAKE_SOURCE_DIR}/src/glog/log_severity.h ${CMAKE_SOURCE_DIR}/include/glog/
   COMMENT "Copying some files to include dir ..."
 )
 
 # 写入 ReadMe.md
 file(WRITE ${CMAKE_SOURCE_DIR}/include/ReadMe.md 
-     "# 用于给ORB__SLAM2使用的头文件 \r\n\r\n"
-     "这些文件由cmake自动从别处复制过来。\r\n\r\n"
-     "如果有需要，请查看GLOG根目录下的 CMakeLists.txt 查找这些文件的来源。"
+     "# 用于给外部调用使用的头文件 \r\n\r\n"
+     "这些文件由 cmake 自动从别处复制过来。\r\n\r\n"
+     "如果有需要，请查看 GLOG 根目录下的 CMakeLists.txt 查找这些文件的来源。"
      "不要直接在这里进行修改，一旦重新make所有的更改都将被覆盖！"
-     )
+     "NOTE: 本文件也由 CMakeLists.txt 自动生成。"
+)
+
+# 下面是自己编写的接口的安装
+install (FILES
+    ${CMAKE_CURRENT_LIST_DIR}/include/gqglog/gqglog.h
+DESTINATION include/gqglog)
+
+
+install (FILES
+    ${CMAKE_CURRENT_LIST_DIR}/lib/libgqglog.a
+DESTINATION lib)
 
 # ================================================================================
