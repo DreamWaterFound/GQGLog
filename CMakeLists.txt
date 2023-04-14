@@ -580,7 +580,7 @@ target_link_libraries(gqglog
 # ===============================================================
 
 # HACK by guoqing 
-install (TARGETS glog gqglog
+install (TARGETS glog
   EXPORT glog-targets
   RUNTIME DESTINATION bin
   PUBLIC_HEADER DESTINATION include/glog
@@ -606,7 +606,7 @@ write_basic_package_version_file (glog-config-version.cmake VERSION
   ${GLOG_VERSION} COMPATIBILITY SameMajorVersion)
 
 # HACK by guoqing -- 但是这里添加的 gqglog 好像是没有啥必要
-export (TARGETS glog gqglog NAMESPACE glog:: FILE glog-targets.cmake)
+export (TARGETS glog NAMESPACE glog:: FILE glog-targets.cmake)
 export (PACKAGE glog)
 
 install (FILES
@@ -624,7 +624,7 @@ add_custom_command(
   COMMAND cp ${CMAKE_BINARY_DIR}/glog/*                  ${CMAKE_SOURCE_DIR}/include/glog/
   COMMAND cp ${CMAKE_SOURCE_DIR}/src/glog/log_severity.h ${CMAKE_SOURCE_DIR}/include/glog/
   COMMENT "Copying some files to include dir ..."
-)
+) 
 
 # 写入 ReadMe.md
 file(WRITE ${CMAKE_SOURCE_DIR}/include/ReadMe.md 
